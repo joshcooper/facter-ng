@@ -10,6 +10,7 @@ module Facter
       @value = value
       logger = Log.new(self)
       type =~ /core|legacy/ ? @type = type : logger.warn('The specified type is invalid!')
+      @filter_tokens = []
       @type ||= :unknown
     end
   end

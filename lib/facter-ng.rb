@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'pathname'
+require 'pry-byebug'
 
 ROOT_DIR = Pathname.new(File.expand_path('..', __dir__)) unless defined?(ROOT_DIR)
 
@@ -15,10 +16,25 @@ module Facter
   end
 
   def self.to_user_output(options, *args)
+    logger = Log.new(self)
+    status = 0
     resolved_facts = Facter::FactManager.instance.resolve_facts(options, args)
     CacheManager.invalidate_all_caches
     fact_formatter = Facter::FormatterFactory.build(options)
-    fact_formatter.format(resolved_facts)
+
+    if Options.instance[:strict]
+      found_names = resolved_facts.map{ |rf| rf.user_query}.uniq
+      missing_names = args - found_names
+      if missing_names.count > 0
+        missing_names.each do |missing_name|
+          logger.error("fact #{missing_name} does not exist.")
+          # resolved_facts << ResolvedFact.new(missing_name)
+        end
+        status = 1
+      end
+    end
+
+    return fact_formatter.format(resolved_facts), status
   end
 
   def self.value(user_query)
