@@ -15,9 +15,19 @@ module Facter
   end
 
   def self.to_user_output(options, *args)
+    logger = Log.new(self)
+
     resolved_facts = Facter::FactManager.instance.resolve_facts(options, args)
     CacheManager.invalidate_all_caches
     fact_formatter = Facter::FormatterFactory.build(options)
+
+    if Options.instance[:strict]
+      unless resolved_facts.find{ |f| f.name.include? args[0]}
+        logger.error("fact \"#{args[0]}\" does not exist.")
+        # exit 1
+      end
+    end
+
     fact_formatter.format(resolved_facts)
   end
 
