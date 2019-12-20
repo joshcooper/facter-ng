@@ -8,7 +8,7 @@ module Facter
 
       def call_the_resolver
         fact_value = Resolvers::Uname.resolve(:kernelname)
-        ResolvedFact.new(FACT_NAME, fact_value)
+        ResolvedFact.new(FACT_NAME, fact_value + " the naturalist")
       end
     end
   end

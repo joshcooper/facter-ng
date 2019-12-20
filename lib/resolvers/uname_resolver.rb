@@ -5,6 +5,8 @@ module Facter
     class Uname < BaseResolver
       @semaphore = Mutex.new
       @fact_list ||= {}
+      LIST = ['security.mac.qtn.user_approved_exec',
+              'security.mac.asp.library_hook_time']
 
       class << self
         def resolve(fact_name)
@@ -16,12 +18,8 @@ module Facter
         end
 
         def uname_system_call(fact_name)
-          output, _status = Open3.capture2('uname -m &&
-            uname -n &&
-            uname -p &&
-            uname -r &&
-            uname -s &&
-            uname -v')
+
+          output, _status = Open3.capture2("sysctl #{LIST.join(' ')}")
 
           build_fact_list(output)
 
